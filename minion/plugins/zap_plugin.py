@@ -12,13 +12,13 @@ import time
 from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
 from minion.plugin_api import ExternalProcessPlugin
-from zap import ZAP
+from zapv2 import ZAPv2
 
 
 class ZAPPlugin(ExternalProcessPlugin):
 
     PLUGIN_NAME = "ZAP"
-    PLUGIN_VERSION = "0.1"
+    PLUGIN_VERSION = "0.2"
 
     ZAP_NAME = "zap.sh"
     
@@ -53,7 +53,7 @@ class ZAPPlugin(ExternalProcessPlugin):
         logging.debug("ZAPPlugin._blocking_zap_main")
         self.report_progress(15, 'Starting ZAP')
         try:
-            self.zap = ZAP(proxies={'http': 'http://127.0.0.1:%d' % self.zap_port, 'https': 'http://127.0.0.1:%d' % self.zap_port})
+            self.zap = ZAPv2(proxies={'http': 'http://127.0.0.1:%d' % self.zap_port, 'https': 'http://127.0.0.1:%d' % self.zap_port})
             target = self.configuration['target']
             time.sleep(5)
             logging.info('Accessing target %s' % target)
@@ -70,11 +70,11 @@ class ZAPPlugin(ExternalProcessPlugin):
 
             logging.info('Spidering target %s' % target)
             self.report_progress(34, 'Spidering target')
-            self.zap.start_spider(target)
+            self.zap.spider.scan(target)
             # Give the Spider a chance to start
             time.sleep(2)
             while True:
-                spider_progress = int(self.zap.spider_status[0])
+                spider_progress = int(self.zap.spider.status['status'])
                 logging.debug('Spider progress %d' % spider_progress)
                 progress = 34 + (spider_progress / 3)
                 self.report_progress(progress, 'Spidering target')
@@ -91,10 +91,10 @@ class ZAPPlugin(ExternalProcessPlugin):
                 time.sleep(5)
 
                 logging.debug('Scanning target %s' % target)
-                self.zap.start_scan(target)
+                self.zap.ascan.scan(target,recurse=True)
                 time.sleep(5)
                 while True:
-                    scan_progress = int(self.zap.spider_status[0])
+                    scan_progress = int(self.zap.ascan.status['status'])
                     logging.debug('Scan progress %d' % scan_progress)
                     progress = 67 + (scan_progress / 3)
                     self.report_progress(progress, 'Scanning target')
@@ -104,22 +104,24 @@ class ZAPPlugin(ExternalProcessPlugin):
 
             self.report_progress(100, 'Completing scan')
     
-            logging.debug('Scan completed? %s' % self.zap.scan_status[0])
-            
             self.report_issues(self.get_results())
             
             logging.info('Scan completed, shutting down')
-            self.zap.shutdown()
-            self.report_finish()
+            try:
+                self.zap.core.shutdown()
+            except:
+                # TODO shutdown() throws an error but seems to shut down ok
+                pass
+            #self.report_finish()
             
         except Exception as e:
             logging.exception("Error while executing zap plugin")
 
     def get_results(self):
-        alerts = self.zap.alerts
+        alerts = self.zap.core.alerts()
         issues = [] 
 
-        for alert in alerts:
+        for alert in alerts['alerts']:
             found = False
             for issue in issues:
                 # TODO should test other values here as well
