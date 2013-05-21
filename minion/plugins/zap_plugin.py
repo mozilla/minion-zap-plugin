@@ -74,15 +74,15 @@ class ZAPPlugin(ExternalProcessPlugin):
             # Give the Spider a chance to start
             time.sleep(2)
             while True:
-                spider_progress = int(self.zap.spider.status['status'])
-                logging.debug('Spider progress %d' % spider_progress)
+                spider_progress = int(self.zap.spider.status[0])
+                logging.info('Spider progress %d' % spider_progress)
                 progress = 34 + (spider_progress / 3)
                 self.report_progress(progress, 'Spidering target')
                 if spider_progress == 100:
                     break
                 time.sleep(5)
 
-            logging.debug('Spider completed')
+            logging.info('Spider completed')
 
             self.report_progress(67, 'Scanning target')
 
@@ -90,12 +90,12 @@ class ZAPPlugin(ExternalProcessPlugin):
                 # Give the passive scanner a chance to finish
                 time.sleep(5)
 
-                logging.debug('Scanning target %s' % target)
+                logging.info('Scanning target %s' % target)
                 self.zap.ascan.scan(target,recurse=True)
                 time.sleep(5)
                 while True:
-                    scan_progress = int(self.zap.ascan.status['status'])
-                    logging.debug('Scan progress %d' % scan_progress)
+                    scan_progress = int(self.zap.ascan.status[0])
+                    logging.info('Scan progress %d' % scan_progress)
                     progress = 67 + (scan_progress / 3)
                     self.report_progress(progress, 'Scanning target')
                     if scan_progress == 100:
@@ -121,7 +121,7 @@ class ZAPPlugin(ExternalProcessPlugin):
         alerts = self.zap.core.alerts()
         issues = [] 
 
-        for alert in alerts['alerts']:
+        for alert in alerts:
             found = False
             for issue in issues:
                 # TODO should test other values here as well
