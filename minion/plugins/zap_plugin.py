@@ -11,7 +11,7 @@ import time
 
 from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
-from minion.plugin_api import ExternalProcessPlugin
+from minion.plugins.base import ExternalProcessPlugin
 from zapv2 import ZAPv2
 
 
@@ -49,10 +49,45 @@ class ZAPPlugin(ExternalProcessPlugin):
     def _random_port(self):
         return random.randint(8192, 16384)
 
+    #
+    # Convert a ZAP alert to a Minion issue.
+    #
+    #   Summary       alert
+    #   Description:  description
+    #   Further-Info: (URL:xxx,Title:"")
+    #   Severity:     risk
+    #   Confidence:   reliability
+    #   Solution:     solution
+    #   URLs:         (URL:url,Extra:other)*
+    #
+    
+    def _minion_severity(self, severity):
+        if severity == 'Informational':
+            return 'Info'
+        return severity
+
+    def _minion_issue(self, alert):
+
+        issue = { "_Alert": alert,
+                  "Summary" : alert.get('alert'),
+                  "Description" : alert.get('description'),
+                  "Severity" : self._minion_severity(alert.get('risk')),
+                  "Confidence" : alert.get('reliability'),
+                  "Solution" : alert.get('solution'),
+                  "URLs" : [{'URL': alert.get('url'), 'Extra': alert.get('other')}] }
+        
+        if alert.get('reference', '') != '':
+            issue["FurtherInfo"] = [{'URL': url, 'Title': None} for url in alert.get('reference').split("\n")]
+
+        return issue
+
     def _blocking_zap_main(self):
+
         logging.debug("ZAPPlugin._blocking_zap_main")
         self.report_progress(15, 'Starting ZAP')
+
         try:
+
             self.zap = ZAPv2(proxies={'http': 'http://127.0.0.1:%d' % self.zap_port, 'https': 'http://127.0.0.1:%d' % self.zap_port})
             target = self.configuration['target']
             time.sleep(5)
@@ -104,8 +139,21 @@ class ZAPPlugin(ExternalProcessPlugin):
 
             self.report_progress(100, 'Completing scan')
     
-            self.report_issues(self.get_results())
+            #
+            # Report the found issues. We group them by Summary.
+            #
             
+            issues_by_summary = {}
+            for alert in self.zap.core.alerts():
+                issue = self._minion_issue(alert)
+                if issue['Summary'] not in issues_by_summary:
+                    issues_by_summary[issue['Summary']] = issue
+                else:
+                    issues_by_summary[issue['Summary']]['URLs'] += issue['URLs']
+
+            for issue in issues_by_summary.values():
+                self.report_issues([issue])
+
             logging.info('Scan completed, shutting down')
             try:
                 self.zap.core.shutdown()
@@ -115,32 +163,6 @@ class ZAPPlugin(ExternalProcessPlugin):
             #self.report_finish()
             
         except Exception as e:
+
             logging.exception("Error while executing zap plugin")
-
-    def get_results(self):
-        alerts = self.zap.core.alerts()
-        issues = [] 
-
-        for alert in alerts:
-            found = False
-            for issue in issues:
-                # TODO should test other values here as well
-                if alert.get('alert') == issue['Summary']:
-                    if len(issue['URLs']) < 25:
-                        issue['URLs'].append(alert.get('url'))
-                    found = True
-                    break
-                if found:
-                    break
-            if not found:
-                issues.append({
-                    "Summary" : alert.get('alert'), 
-                    "Description" : alert.get('description'), 
-                    "Further-Info" : alert.get('other'), 
-                    "Severity" : alert.get('risk'), 
-                    "Confidence" : alert.get('reliability'), 
-                    "Solution" : alert.get('solution'), 
-                    "URLs" : [alert.get('url')]});
-
-        return issues
 

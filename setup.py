@@ -6,11 +6,11 @@ from setuptools import setup
 
 install_requires = [
     'python-owasp-zap-v2==0.0.2',
-    'minion.plugin_service'
+    'minion-backend'
 ]
 
-setup(name="minion.zap_plugin",
-      version="0.1",
+setup(name="minion-zap-plugin",
+      version="0.2",
       description="OWASP ZAP Plugin for Minion",
       url="https://github.com/mozilla/minion-zap-plugin/",
       author="Mozilla",
