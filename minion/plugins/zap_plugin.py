@@ -160,7 +160,7 @@ class ZAPPlugin(ExternalProcessPlugin):
             except:
                 # TODO shutdown() throws an error but seems to shut down ok
                 pass
-            #self.report_finish()
+            self.report_finish()
             
         except Exception as e:
 
