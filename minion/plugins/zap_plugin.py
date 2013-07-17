@@ -109,7 +109,7 @@ class ZAPPlugin(ExternalProcessPlugin):
             # Give the Spider a chance to start
             time.sleep(2)
             while True:
-                spider_progress = int(self.zap.spider.status[0])
+                spider_progress = int(self.zap.spider.status)
                 logging.info('Spider progress %d' % spider_progress)
                 progress = 34 + (spider_progress / 3)
                 self.report_progress(progress, 'Spidering target')
@@ -129,7 +129,7 @@ class ZAPPlugin(ExternalProcessPlugin):
                 self.zap.ascan.scan(target,recurse=True)
                 time.sleep(5)
                 while True:
-                    scan_progress = int(self.zap.ascan.status[0])
+                    scan_progress = int(self.zap.ascan.status)
                     logging.info('Scan progress %d' % scan_progress)
                     progress = 67 + (scan_progress / 3)
                     self.report_progress(progress, 'Scanning target')
@@ -144,7 +144,7 @@ class ZAPPlugin(ExternalProcessPlugin):
             #
             
             issues_by_summary = {}
-            for alert in self.zap.core.alerts():
+            for alert in self.zap.core.alerts()['alerts']:
                 issue = self._minion_issue(alert)
                 if issue['Summary'] not in issues_by_summary:
                     issues_by_summary[issue['Summary']] = issue
