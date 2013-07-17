@@ -18,7 +18,7 @@ from zapv2 import ZAPv2
 class ZAPPlugin(ExternalProcessPlugin):
 
     PLUGIN_NAME = "ZAP"
-    PLUGIN_VERSION = "0.2"
+    PLUGIN_VERSION = "0.3"
 
     ZAP_NAME = "zap.sh"
     
