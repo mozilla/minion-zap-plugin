@@ -5,6 +5,7 @@
 from setuptools import setup
 
 install_requires = [
+    'jinja2',
     'python-owasp-zap-v2==0.0.6',
     'minion-backend'
 ]

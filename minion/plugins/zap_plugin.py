@@ -2,18 +2,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-
 import logging
 import os
 import random
-import tempfile
 import time
 
+import jinja2
 from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
-from minion.plugins.base import ExternalProcessPlugin
 from zapv2 import ZAPv2
 
+from minion.plugins.base import ExternalProcessPlugin
 
 class ZAPPlugin(ExternalProcessPlugin):
 
@@ -22,6 +21,15 @@ class ZAPPlugin(ExternalProcessPlugin):
 
     ZAP_NAME = "zap.sh"
     
+    def config(self, data):
+        """ Render and write ZAP's config.xml file. """
+        CURR = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(CURR, 'config.xml.example'), 'r') as f:
+            content = f.read()
+        with open(os.path.join(self.work_directory, 'config.xml'), 'w+') as f:
+            template = jinja2.Template(content)
+            f.write(template.render(data))
+
     def do_configure(self):
         logging.debug("ZAPPlugin.do_configure")
         self.zap_path = self.locate_program(self.ZAP_NAME)
@@ -37,6 +45,16 @@ class ZAPPlugin(ExternalProcessPlugin):
 
     def do_start(self):
         logging.debug("ZAPPlugin.do_start")
+
+        # configure config.xml before starting daemon if auth == true
+        # until I or psiinon add an API to ZAP to configure
+        # the configuration file directly via Python API,
+        # config.xml must be written BEFORE the server starts up.
+        auth = self.configuration.get('auth', {})
+        if auth:
+            auth.update({'auth': True})     
+            self.config(auth)
+
         # Start ZAP in daemon mode
         self.zap_port = self._random_port()
         args = ['-daemon', '-port', str(self.zap_port), '-dir', self.work_directory]
@@ -82,12 +100,10 @@ class ZAPPlugin(ExternalProcessPlugin):
         return issue
 
     def _blocking_zap_main(self):
-
         logging.debug("ZAPPlugin._blocking_zap_main")
         self.report_progress(15, 'Starting ZAP')
 
         try:
-
             self.zap = ZAPv2(proxies={'http': 'http://127.0.0.1:%d' % self.zap_port, 'https': 'http://127.0.0.1:%d' % self.zap_port})
             target = self.configuration['target']
             time.sleep(5)
