@@ -31,15 +31,6 @@ class ZAPPlugin(ExternalProcessPlugin):
             template = jinja2.Template(content)
             f.write(template.render(data))
 
-    def get_site_info(self):
-        std_ports = {'http': '80', 'https': 443}
-        
-        parsed = urlparse.urlparse(self.configuration['target'])
-        return {'netloc': parsed.netloc,
-            'scheme': parsed.scheme,
-            'hostname': parsed.hostname,
-            'port': parsed.port or std_ports[parsed.scheme]}
-
     def do_session(self, auth):
         """ Adding session token and its value
         to ZAP session. """
