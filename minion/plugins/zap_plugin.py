@@ -73,8 +73,17 @@ class ZAPPlugin(ExternalProcessPlugin):
         # config.xml must be written BEFORE the server starts up.
         auth = self.configuration.get('auth', {})
         if auth and auth['type'] == 'basic':
-                auth.update({'auth': True})     
-                self.config(auth)
+                auth.update({'auth': True})
+                # we don't expect user to specify hostname
+                # or port; but if they do, we will honor user's
+                # own value. By updating the return of
+                # self.get_site_info() we will ONLY override
+                # existing keys in the return by keys present
+                # in auth already.
+                site_info = self.get_site_info()
+                site_info.update(auth)
+                # write config.xml
+                self.config(site_info)
 
         # Start ZAP in daemon mode
         self.zap_port = self._random_port()
