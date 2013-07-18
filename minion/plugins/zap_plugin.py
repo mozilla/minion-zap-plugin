@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import time
+import urlparse
 
 import jinja2
 from twisted.internet import reactor
@@ -23,12 +24,40 @@ class ZAPPlugin(ExternalProcessPlugin):
     
     def config(self, data):
         """ Render and write ZAP's config.xml file. """
-        CURR = os.path.dirname(os.path.abspath(__file__))
-        with open(os.path.join(CURR, 'config.xml.example'), 'r') as f:
+        curr = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(curr, 'config.xml.example'), 'r') as f:
             content = f.read()
         with open(os.path.join(self.work_directory, 'config.xml'), 'w+') as f:
             template = jinja2.Template(content)
             f.write(template.render(data))
+
+    def get_site_info(self):
+        std_ports = {'http': '80', 'https': 443}
+        
+        parsed = urlparse.urlparse(self.configuration['target'])
+        return {'netloc': parsed.netloc,
+            'scheme': parsed.scheme,
+            'hostname': parsed.hostname,
+            'port': parsed.port or std_ports[parsed.scheme]}
+
+    def do_session(self, auth):
+        """ Adding session token and its value
+        to ZAP session. """
+
+        site_info = self.get_site_info()
+        sessions = auth['sessions']
+        self.zap.httpsessions.set_active_session(
+            site_info['netloc'],
+            'Session 0')
+        for session in sessions:                    
+            self.zap.httpsessions.add_session_token(
+                site_info['netloc'],
+                session['token'])
+            self.zap.httpsessions.set_session_token_value(
+                site_info['netloc'],
+                'Session 0',
+                session['token'],
+                session['value'])
 
     def do_configure(self):
         logging.debug("ZAPPlugin.do_configure")
@@ -46,21 +75,22 @@ class ZAPPlugin(ExternalProcessPlugin):
     def do_start(self):
         logging.debug("ZAPPlugin.do_start")
 
-        # configure config.xml before starting daemon if auth == true
-        # until I or psiinon add an API to ZAP to configure
+        # Configure config.xml before starting daemon if 
+        # user chooses basic auth. 
+        #TODO: Until I or psiinon add an API to ZAP to configure
         # the configuration file directly via Python API,
         # config.xml must be written BEFORE the server starts up.
         auth = self.configuration.get('auth', {})
-        if auth:
-            auth.update({'auth': True})     
-            self.config(auth)
+        if auth and auth['type'] == 'basic':
+                auth.update({'auth': True})     
+                self.config(auth)
 
         # Start ZAP in daemon mode
         self.zap_port = self._random_port()
         args = ['-daemon', '-port', str(self.zap_port), '-dir', self.work_directory]
         self.spawn(self.zap_path, args)
         self.report_artifacts("ZAP Output", ["zap.log"])
-        
+
         # Start the main code in a thread
         return deferToThread(self._blocking_zap_main)
         
@@ -108,6 +138,7 @@ class ZAPPlugin(ExternalProcessPlugin):
             target = self.configuration['target']
             time.sleep(5)
             logging.info('Accessing target %s' % target)
+
             
             while (True):
                 try:
@@ -115,6 +146,12 @@ class ZAPPlugin(ExternalProcessPlugin):
                     break
                 except IOError as e:
                     time.sleep(2)
+            
+            # Once we know ZAP is fully started, we can
+            # setup sessions if auth type == 'sessions'
+            auth = self.configuration.get('auth')
+            if auth and isinstance(auth, dict) and auth.get('type') == 'session':
+                self.do_session(auth)
             
             # Give the sites tree a chance to get updated
             time.sleep(2)
