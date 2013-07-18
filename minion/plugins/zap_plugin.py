@@ -34,22 +34,26 @@ class ZAPPlugin(ExternalProcessPlugin):
     def do_session(self, auth):
         """ Adding session token and its value
         to ZAP session. """
-
+ 
         site_info = self.get_site_info()
         sessions = auth['sessions']
+
+        # in ZAP the site will include both the hostname and port
+        netloc = site_info['hostname'] + ':' + str(site_info['port'])
+        self.zap.httpsessions.create_empty_session(netloc)
         self.zap.httpsessions.set_active_session(
-            site_info['netloc'],
+            netloc,
             'Session 0')
         for session in sessions:                    
             self.zap.httpsessions.add_session_token(
-                site_info['netloc'],
+                netloc,
                 session['token'])
             self.zap.httpsessions.set_session_token_value(
-                site_info['netloc'],
+                netloc,
                 'Session 0',
                 session['token'],
                 session['value'])
-
+        
     def do_configure(self):
         logging.debug("ZAPPlugin.do_configure")
         self.zap_path = self.locate_program(self.ZAP_NAME)
@@ -139,14 +143,14 @@ class ZAPPlugin(ExternalProcessPlugin):
             time.sleep(5)
             logging.info('Accessing target %s' % target)
 
-            
+            # ZAP start-up time can take a little while            
             while (True):
                 try:
                     self.zap.urlopen(target)
                     break
                 except IOError as e:
                     time.sleep(2)
-            
+    
             # Once we know ZAP is fully started, we can
             # setup sessions if auth type == 'sessions'
             auth = self.configuration.get('auth')
