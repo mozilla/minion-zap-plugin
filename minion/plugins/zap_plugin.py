@@ -13,6 +13,7 @@ from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
 from zapv2 import ZAPv2
 
+import reference
 from minion.plugins.base import ExternalProcessPlugin
 
 class ZAPPlugin(ExternalProcessPlugin):
@@ -53,7 +54,18 @@ class ZAPPlugin(ExternalProcessPlugin):
                 'Session 0',
                 session['token'],
                 session['value'])
-        
+
+    def _classify(self, alert):
+        cwe_id = alert.get('cweid')
+        wasc_id = alert.get('wasc_id')
+        cwe_url = None if not cwe_id else "http://cwe.mitre.org/data/definitions/%s.html" % cwe_id
+        return {
+            "cwe_id": cwe_id,
+            "cwe_url": cwe_url,
+            "wasc_id": wasc_id,
+            "wasc_url": reference.WASC_MAP.get(wasc_id, None)
+        }
+
     def do_configure(self):
         logging.debug("ZAPPlugin.do_configure")
         self.zap_path = self.locate_program(self.ZAP_NAME)
@@ -122,6 +134,7 @@ class ZAPPlugin(ExternalProcessPlugin):
 
         issue = { "_Alert": alert,
                   "Summary" : alert.get('alert'),
+                  "Classification": self._classify(alert),
                   "Description" : alert.get('description'),
                   "Severity" : self._minion_severity(alert.get('risk')),
                   "Confidence" : alert.get('reliability'),
