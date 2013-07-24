@@ -2,18 +2,18 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-
 import logging
 import os
 import random
-import tempfile
 import time
+import urlparse
 
+import jinja2
 from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
-from minion.plugins.base import ExternalProcessPlugin
 from zapv2 import ZAPv2
 
+from minion.plugins.base import ExternalProcessPlugin
 
 class ZAPPlugin(ExternalProcessPlugin):
 
@@ -22,6 +22,38 @@ class ZAPPlugin(ExternalProcessPlugin):
 
     ZAP_NAME = "zap.sh"
     
+    def config(self, data):
+        """ Render and write ZAP's config.xml file. """
+        curr = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(curr, 'config.xml.example'), 'r') as f:
+            content = f.read()
+        with open(os.path.join(self.work_directory, 'config.xml'), 'w+') as f:
+            template = jinja2.Template(content)
+            f.write(template.render(data))
+
+    def do_session(self, auth):
+        """ Adding session token and its value
+        to ZAP session. """
+ 
+        site_info = self.get_site_info()
+        sessions = auth['sessions']
+
+        # in ZAP the site will include both the hostname and port
+        netloc = site_info['hostname'] + ':' + str(site_info['port'])
+        self.zap.httpsessions.create_empty_session(netloc)
+        self.zap.httpsessions.set_active_session(
+            netloc,
+            'Session 0')
+        for session in sessions:                    
+            self.zap.httpsessions.add_session_token(
+                netloc,
+                session['token'])
+            self.zap.httpsessions.set_session_token_value(
+                netloc,
+                'Session 0',
+                session['token'],
+                session['value'])
+        
     def do_configure(self):
         logging.debug("ZAPPlugin.do_configure")
         self.zap_path = self.locate_program(self.ZAP_NAME)
@@ -37,12 +69,32 @@ class ZAPPlugin(ExternalProcessPlugin):
 
     def do_start(self):
         logging.debug("ZAPPlugin.do_start")
+
+        # Configure config.xml before starting daemon if 
+        # user chooses basic auth. 
+        #TODO: Until I or psiinon add an API to ZAP to configure
+        # the configuration file directly via Python API,
+        # config.xml must be written BEFORE the server starts up.
+        auth = self.configuration.get('auth', {})
+        if auth and auth['type'] == 'basic':
+                auth.update({'auth': True})
+                # we don't expect user to specify hostname
+                # or port; but if they do, we will honor user's
+                # own value. By updating the return of
+                # self.get_site_info() we will ONLY override
+                # existing keys in the return by keys present
+                # in auth already.
+                site_info = self.get_site_info()
+                site_info.update(auth)
+                # write config.xml
+                self.config(site_info)
+
         # Start ZAP in daemon mode
         self.zap_port = self._random_port()
         args = ['-daemon', '-port', str(self.zap_port), '-dir', self.work_directory]
         self.spawn(self.zap_path, args)
         self.report_artifacts("ZAP Output", ["zap.log"])
-        
+
         # Start the main code in a thread
         return deferToThread(self._blocking_zap_main)
         
@@ -82,23 +134,28 @@ class ZAPPlugin(ExternalProcessPlugin):
         return issue
 
     def _blocking_zap_main(self):
-
         logging.debug("ZAPPlugin._blocking_zap_main")
         self.report_progress(15, 'Starting ZAP')
 
         try:
-
             self.zap = ZAPv2(proxies={'http': 'http://127.0.0.1:%d' % self.zap_port, 'https': 'http://127.0.0.1:%d' % self.zap_port})
             target = self.configuration['target']
             time.sleep(5)
             logging.info('Accessing target %s' % target)
-            
+
+            # ZAP start-up time can take a little while            
             while (True):
                 try:
                     self.zap.urlopen(target)
                     break
                 except IOError as e:
                     time.sleep(2)
+    
+            # Once we know ZAP is fully started, we can
+            # setup sessions if auth type == 'sessions'
+            auth = self.configuration.get('auth')
+            if auth and isinstance(auth, dict) and auth.get('type') == 'session':
+                self.do_session(auth)
             
             # Give the sites tree a chance to get updated
             time.sleep(2)

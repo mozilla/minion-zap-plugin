@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<config>
+<version>1004000</version>
+<userDir/>
+<connection>
+		<proxyChain>
+			<hostName/>
+			<port>8080</port>
+			<skipName/>
+			<realm/>
+			<userName/>
+			<password/>		
+			<prompt>false</prompt>
+		</proxyChain>
+		<auth/>
+	<sslConnectPorts>443</sslConnectPorts>
+<timeoutInSecs>20</timeoutInSecs>
+<singleCookieRequestHeader>true</singleCookieRequestHeader>
+{% if auth %}
+<auths>
+<auth>
+<name>{{ name|default('1') }}</name>
+<hostName>{{ hostname }}</hostName>
+<port>{{ port }}</port>
+<userName>{{ username }}</userName>
+<password>{{ password }}</password>
+<realm>{{ realm }}</realm>
+<enabled>true</enabled>
+</auth>
+</auths>
+{% else %}
+<auth></auth>
+{% endif %}
+<confirmRemoveAuth>true</confirmRemoveAuth>
+</connection>
+<proxy>
+		<ip>localhost</ip>
+		<port>8080</port>
+		<reverseProxy>
+			<use>0</use>	
+			<ip>127.0.1.1</ip>
+			<httpPort>80</httpPort>
+			<httpsPort>443</httpsPort>
+		</reverseProxy>		
+	<modifyAcceptEncoding>true</modifyAcceptEncoding>
+</proxy>
+<view>
+		<processImages>0</processImages>
+		<displayOption>1</displayOption>
+		<editorView>2</editorView>
+		<brkPanelView>0</brkPanelView>
+		<showMainToolbar>1</showMainToolbar>
+	<locale>en_GB</locale>
+<mode>standard</mode>
+<advancedview>0</advancedview>
+<askOnExit>1</askOnExit>
+<uiWmHandling>0</uiWmHandling>
+<main>
+<request>
+<httppanel>
+<defaultcomponent>RequestSplit</defaultcomponent>
+<components>
+<dividerLocation>178</dividerLocation>
+<split>
+<header>
+<defaultview>HttpPanelSyntaxHighlightTextView</defaultview>
+<views>
+<HttpPanelSyntaxHighlightTextView>
+<aa>true</aa>
+<linenumbers>false</linenumbers>
+<wordwrap>true</wordwrap>
+<highlightline>false</highlightline>
+<fadehighlightline>false</fadehighlightline>
+<whitespaces>false</whitespaces>
+<newlines>false</newlines>
+<markocurrences>false</markocurrences>
+<roundedselection>false</roundedselection>
+<bracketmatch>false</bracketmatch>
+<animatedbracketmatch>false</animatedbracketmatch>
+</HttpPanelSyntaxHighlightTextView>
+</views>
+</header>
+<body>
+<defaultview>HttpPanelSyntaxHighlightTextView</defaultview>
+<views>
+<HttpPanelSyntaxHighlightTextView>
+<aa>true</aa>
+<linenumbers>false</linenumbers>
+<wordwrap>true</wordwrap>
+<highlightline>false</highlightline>
+<fadehighlightline>false</fadehighlightline>
+<whitespaces>false</whitespaces>
+<newlines>false</newlines>
+<markocurrences>false</markocurrences>
+<roundedselection>false</roundedselection>
+<bracketmatch>false</bracketmatch>
+<animatedbracketmatch>false</animatedbracketmatch>
+<syntax>
+<autodetect>true</autodetect>
+</syntax>
+</HttpPanelSyntaxHighlightTextView>
+</views>
+</body>
+</split>
+<all>
+<defaultview>HttpPanelSyntaxHighlightTextView</defaultview>
+<views>
+<HttpPanelSyntaxHighlightTextView>
+<aa>true</aa>
+<linenumbers>false</linenumbers>
+<wordwrap>true</wordwrap>
+<highlightline>false</highlightline>
+<fadehighlightline>false</fadehighlightline>
+<whitespaces>false</whitespaces>
+<newlines>false</newlines>
+<markocurrences>false</markocurrences>
+<roundedselection>false</roundedselection>
+<bracketmatch>false</bracketmatch>
+<animatedbracketmatch>false</animatedbracketmatch>
+</HttpPanelSyntaxHighlightTextView>
+</views>
+</all>
+<websocket>
+<defaultview>HttpPanelSyntaxHighlightTextView</defaultview>
+<views>
+<HttpPanelSyntaxHighlightTextView>
+<aa>true</aa>
+<linenumbers>false</linenumbers>
+<wordwrap>true</wordwrap>
+<highlightline>false</highlightline>
+<fadehighlightline>false</fadehighlightline>
+<whitespaces>false</whitespaces>
+<newlines>false</newlines>
+<markocurrences>false</markocurrences>
+<roundedselection>false</roundedselection>
+<bracketmatch>false</bracketmatch>
+<animatedbracketmatch>false</animatedbracketmatch>
+</HttpPanelSyntaxHighlightTextView>
+</views>
+</websocket>
+</components>
+</httppanel>
+</request>
+<response>
+<httppanel>
+<defaultcomponent>ResponseSplit</defaultcomponent>
+<components>
+<all>
+<defaultview>HttpPanelSyntaxHighlightTextView</defaultview>
+<views>
+<HttpPanelSyntaxHighlightTextView>
+<aa>true</aa>
+<linenumbers>false</linenumbers>
+<wordwrap>true</wordwrap>
+<highlightline>false</highlightline>
+<fadehighlightline>false</fadehighlightline>
+<whitespaces>false</whitespaces>
+<newlines>false</newlines>
+<markocurrences>false</markocurrences>
+<roundedselection>false</roundedselection>
+<bracketmatch>false</bracketmatch>
+<animatedbracketmatch>false</animatedbracketmatch>
+</HttpPanelSyntaxHighlightTextView>
+</views>
+</all>
+<websocket>
+<defaultview>HttpPanelSyntaxHighlightTextView</defaultview>
+<views>
+<HttpPanelSyntaxHighlightTextView>
+<aa>true</aa>
+<linenumbers>false</linenumbers>
+<wordwrap>true</wordwrap>
+<highlightline>false</highlightline>
+<fadehighlightline>false</fadehighlightline>
+<whitespaces>false</whitespaces>
+<newlines>false</newlines>
+<markocurrences>false</markocurrences>
+<roundedselection>false</roundedselection>
+<bracketmatch>false</bracketmatch>
+<animatedbracketmatch>false</animatedbracketmatch>
+</HttpPanelSyntaxHighlightTextView>
+</views>
+</websocket>
+<dividerLocation>177</dividerLocation>
+<split>
+<header>
+<defaultview>HttpPanelSyntaxHighlightTextView</defaultview>
+<views>
+<HttpPanelSyntaxHighlightTextView>
+<aa>true</aa>
+<linenumbers>false</linenumbers>
+<wordwrap>true</wordwrap>
+<highlightline>false</highlightline>
+<fadehighlightline>false</fadehighlightline>
+<whitespaces>false</whitespaces>
+<newlines>false</newlines>
+<markocurrences>false</markocurrences>
+<roundedselection>false</roundedselection>
+<bracketmatch>false</bracketmatch>
+<animatedbracketmatch>false</animatedbracketmatch>
+</HttpPanelSyntaxHighlightTextView>
+</views>
+</header>
+<body>
+<defaultview>HttpPanelSyntaxHighlightTextView</defaultview>
+<views>
+<HttpPanelSyntaxHighlightTextView>
+<aa>true</aa>
+<linenumbers>false</linenumbers>
+<wordwrap>true</wordwrap>
+<highlightline>false</highlightline>
+<fadehighlightline>false</fadehighlightline>
+<whitespaces>false</whitespaces>
+<newlines>false</newlines>
+<markocurrences>false</markocurrences>
+<roundedselection>false</roundedselection>
+<bracketmatch>false</bracketmatch>
+<animatedbracketmatch>false</animatedbracketmatch>
+<syntax>
+<autodetect>true</autodetect>
+</syntax>
+</HttpPanelSyntaxHighlightTextView>
+</views>
+</body>
+</split>
+</components>
+</httppanel>
+</response>
+</main>
+</view>
+<start>
+        <checkForUpdates>0</checkForUpdates>
+    <dayLastChecked>Never</dayLastChecked>
+<downloadNewRelease>false</downloadNewRelease>
+<checkAddonUpdates>false</checkAddonUpdates>
+<installAddonUpdates>false</installAddonUpdates>
+<installScannerRules>false</installScannerRules>
+<reportReleaseAddons>false</reportReleaseAddons>
+<reportBetaAddons>false</reportBetaAddons>
+<reportAlphaAddons>false</reportAlphaAddons>
+</start>
+<certificate>
+		<use>0</use>
+		<clientCertLocation/>
+		<experimentalSlotListIndex>false</experimentalSlotListIndex>
+	</certificate>
+<spider>
+		<thread>2</thread>
+		<maxDepth>5</maxDepth>
+		<scope/>
+		<postform>true</postform>
+		<processform>true</processform>
+		<sendCookies>false</sendCookies>
+		<skipurl/>
+		<requestwait>200</requestwait>
+		<parseComments>true</parseComments>
+		<parseRobotsTxt>false</parseRobotsTxt>
+	<handleParameters>USE_ALL</handleParameters>
+<handleODataParameters>false</handleODataParameters>
+</spider>
+<scanner>
+		<hostPerScan>2</hostPerScan>
+		<threadPerHost>2</threadPerHost>
+	<delayInMs>0</delayInMs>
+<antiCSFR>false</antiCSFR>
+<deleteOnShutdown>true</deleteOnShutdown>
+<level>MEDIUM</level>
+<strength>MEDIUM</strength>
+</scanner>
+<portscan>
+		<threadPerHost>5</threadPerHost>
+		<maxPort>10240</maxPort>
+	<timeoutInMs>100</timeoutInMs>
+</portscan>
+<bruteforce>
+		<threadPerHost>10</threadPerHost>
+	<recursive>true</recursive>
+<defaultFile/>
+<browsefiles>false</browsefiles>
+<fileextensions/>
+</bruteforce>
+<plugins>
+<p6>
+<enabled>1</enabled>
+</p6>
+<p7>
+<enabled>1</enabled>
+</p7>
+<p20010>
+<enabled>1</enabled>
+</p20010>
+<p20012>
+<enabled>1</enabled>
+</p20012>
+<p40009>
+<enabled>1</enabled>
+</p40009>
+<p40012>
+<enabled>1</enabled>
+</p40012>
+<p40013>
+<enabled>1</enabled>
+</p40013>
+<p40015>
+<enabled>1</enabled>
+</p40015>
+<p40018>
+<enabled>1</enabled>
+</p40018>
+<p40019>
+<enabled>1</enabled>
+</p40019>
+<p40020>
+<enabled>1</enabled>
+</p40020>
+<p40021>
+<enabled>1</enabled>
+</p40021>
+<p40022>
+<enabled>1</enabled>
+</p40022>
+<p0>
+<enabled>1</enabled>
+</p0>
+<p3>
+<enabled>1</enabled>
+</p3>
+<p10001>
+<enabled>1</enabled>
+</p10001>
+<p30000>
+<enabled>1</enabled>
+</p30000>
+<p40003>
+<enabled>1</enabled>
+</p40003>
+<p40008>
+<enabled>1</enabled>
+</p40008>
+<p20014>
+<enabled>1</enabled>
+</p20014>
+<p40023>
+<enabled>1</enabled>
+</p40023>
+</plugins>
+<fuzzer>
+<threadPerScan>1</threadPerScan>
+<defaultCategory/>
+<delayInMs>0</delayInMs>
+</fuzzer>
+<httpsessions>
+<tokens>
+<token>
+<name>asp.net_sessionid</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>aspsessionid</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>siteserver</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>cfid</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>cftoken</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>jsessionid</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>phpsessid</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>sessid</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>sid</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>viewstate</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>zenid</name>
+<enabled>true</enabled>
+</token>
+</tokens>
+<proxyOnly>false</proxyOnly>
+<confirmRemoveToken>true</confirmRemoveToken>
+</httpsessions>
+<websocket>
+<forwardAll>false</forwardAll>
+<breakOnAll>false</breakOnAll>
+<breakOnPingPong>false</breakOnPingPong>
+</websocket>
+<ext>
+<ExtensionAPI>true</ExtensionAPI>
+<ExtensionActiveScan>true</ExtensionActiveScan>
+<ExtensionAlert>true</ExtensionAlert>
+<ExtensionAntiCSRF>true</ExtensionAntiCSRF>
+<ExtensionAuth>true</ExtensionAuth>
+<ExtensionAutoUpdate>true</ExtensionAutoUpdate>
+<ExtensionBreak>true</ExtensionBreak>
+<ExtensionBruteForce>true</ExtensionBruteForce>
+<ExtensionCompare>true</ExtensionCompare>
+<ExtensionCopy>true</ExtensionCopy>
+<ExtensionDynSSL>true</ExtensionDynSSL>
+<ExtensionEdit>true</ExtensionEdit>
+<ExtensionEncode2>true</ExtensionEncode2>
+<ExtensionExtension>true</ExtensionExtension>
+<ExtensionFilter>true</ExtensionFilter>
+<ExtensionFuzz>true</ExtensionFuzz>
+<ExtensionHelp>true</ExtensionHelp>
+<ExtensionHistory>true</ExtensionHistory>
+<ExtensionHttpPanelComponentonentAll>true</ExtensionHttpPanelComponentonentAll>
+<ExtensionHttpPanelHexView>true</ExtensionHttpPanelHexView>
+<ExtensionHttpPanelImageView>true</ExtensionHttpPanelImageView>
+<ExtensionHttpPanelLargeResponseView>true</ExtensionHttpPanelLargeResponseView>
+<ExtensionHttpPanelRequestFormTableView>true</ExtensionHttpPanelRequestFormTableView>
+<ExtensionHttpPanelRequestQueryCookieTableView>true</ExtensionHttpPanelRequestQueryCookieTableView>
+<ExtensionHttpPanelSyntaxHighlightTextView>true</ExtensionHttpPanelSyntaxHighlightTextView>
+<ExtensionHttpSessions>true</ExtensionHttpSessions>
+<ExtensionInvoke>true</ExtensionInvoke>
+<ExtensionLog4j>true</ExtensionLog4j>
+<ExtensionManualRequest>true</ExtensionManualRequest>
+<ExtensionParams>true</ExtensionParams>
+<ExtensionPassiveScan>true</ExtensionPassiveScan>
+<ExtensionPortScan>true</ExtensionPortScan>
+<ExtensionQuickStart>true</ExtensionQuickStart>
+<ExtensionReport>true</ExtensionReport>
+<ExtensionRequestPostTableView>true</ExtensionRequestPostTableView>
+<ExtensionReveal>true</ExtensionReveal>
+<ExtensionSaveRawHttpMessage>true</ExtensionSaveRawHttpMessage>
+<ExtensionScripts>true</ExtensionScripts>
+<ExtensionSearch2>true</ExtensionSearch2>
+<ExtensionSitesRefresh>true</ExtensionSitesRefresh>
+<ExtensionSpider>true</ExtensionSpider>
+<ExtensionSpiderAjax>true</ExtensionSpiderAjax>
+<ExtensionStandardMenus>true</ExtensionStandardMenus>
+<ExtensionState>true</ExtensionState>
+<ExtensionUiUtils>true</ExtensionUiUtils>
+<ExtensionViewOption>true</ExtensionViewOption>
+<ExtensionWebSocket>true</ExtensionWebSocket>
+</ext>
+<database>
+<compact>false</compact>
+</database>
+<invoke>
+<confirmRemoveApp>true</confirmRemoveApp>
+</invoke>
+<encode>
+<param>
+<base64charset>UTF-8</base64charset>
+<base64dobreaklines>true</base64dobreaklines>
+</param>
+</encode>
+<api>
+<enabled>true</enabled>
+</api>
+<pscans>
+<autoTagScanners>
+<scanner>
+<name>html_tag_form</name>
+<type>TAG</type>
+<config>Form</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>&lt;form</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_tag_password</name>
+<type>TAG</type>
+<config>Password</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>&lt;password\s</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_type_password</name>
+<type>TAG</type>
+<config>Password</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>type\s*=\s*['"]?password['"]?</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_type_hidden</name>
+<type>TAG</type>
+<config>Hidden</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>type\s*=\s*['"]?hidden['"]?</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_type_upload</name>
+<type>TAG</type>
+<config>Upload</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>type\s*=\s*['"]?file['"]?</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_tag_object</name>
+<type>TAG</type>
+<config>Object</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>&lt;object\s</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_tag_script</name>
+<type>TAG</type>
+<config>Script</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>&lt;script</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_mailto</name>
+<type>TAG</type>
+<config>MailTo</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>&lt;.*href\s*['"]?mailto:</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_setcookie</name>
+<type>TAG</type>
+<config>SetCookie</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex>set-cookie</resHeadRegex>
+<resBodyRegex/>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_comment1</name>
+<type>TAG</type>
+<config>Comment</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>/\*</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+<scanner>
+<name>html_comment2</name>
+<type>TAG</type>
+<config>Comment</config>
+<reqUrlRegex/>
+<reqHeadRegex/>
+<resHeadRegex/>
+<resBodyRegex>&lt;!--</resBodyRegex>
+<enabled>true</enabled>
+</scanner>
+</autoTagScanners>
+<confirmRemoveAutoTagScanner>true</confirmRemoveAutoTagScanner>
+</pscans>
+<anticsrf>
+<tokens>
+<token>
+<name>anticsrf</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>CSRFToken</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>__RequestVerificationToken</name>
+<enabled>true</enabled>
+</token>
+<token>
+<name>csrfmiddlewaretoken</name>
+<enabled>true</enabled>
+</token>
+</tokens>
+<confirmRemoveToken>true</confirmRemoveToken>
+</anticsrf>
+</config>
