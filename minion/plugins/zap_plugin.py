@@ -56,9 +56,16 @@ class ZAPPlugin(ExternalProcessPlugin):
                 session['value'])
 
     def _classify(self, alert):
+        cwe_url = None
         cwe_id = alert.get('cweid')
         wasc_id = alert.get('wasc_id')
-        cwe_url = None if not cwe_id else "http://cwe.mitre.org/data/definitions/%s.html" % cwe_id
+        # ZAP default return '0' for issues don't have a CWE/WASC reference
+        if cwe_id == '0':
+            cwe_id = None
+        if wasc_id == '0':
+            wasc_id = None
+        if cwe_id:
+            cwe_url = "http://cwe.mitre.org/data/definitions/%s.html" % cwe_id
         return {
             "cwe_id": cwe_id,
             "cwe_url": cwe_url,
@@ -139,7 +146,14 @@ class ZAPPlugin(ExternalProcessPlugin):
                   "Severity" : self._minion_severity(alert.get('risk')),
                   "Confidence" : alert.get('reliability'),
                   "Solution" : alert.get('solution'),
-                  "URLs" : [{'URL': alert.get('url'), 'Extra': alert.get('other')}] }
+                  "URLs" : [{
+                        'URL': alert.get('url'), 
+                        'Extra': alert.get('other'),
+                        'Attack': alert.get('attack'),
+                        'Evidence': alert.get('evidence'),
+                        'Parameter': alert.get('param')
+                  }]
+        }
         
         if alert.get('reference', '') != '':
             issue["FurtherInfo"] = [{'URL': url, 'Title': None} for url in alert.get('reference').split("\n")]
