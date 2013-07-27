@@ -13,6 +13,7 @@ from twisted.internet import reactor
 from twisted.internet.threads import deferToThread
 from zapv2 import ZAPv2
 
+import reference
 from minion.plugins.base import ExternalProcessPlugin
 
 class ZAPPlugin(ExternalProcessPlugin):
@@ -53,7 +54,25 @@ class ZAPPlugin(ExternalProcessPlugin):
                 'Session 0',
                 session['token'],
                 session['value'])
-        
+
+    def _classify(self, alert):
+        cwe_url = None
+        cwe_id = alert.get('cweid')
+        wasc_id = alert.get('wasc_id')
+        # ZAP default return '0' for issues don't have a CWE/WASC reference
+        if cwe_id == '0':
+            cwe_id = None
+        if wasc_id == '0':
+            wasc_id = None
+        if cwe_id:
+            cwe_url = "http://cwe.mitre.org/data/definitions/%s.html" % cwe_id
+        return {
+            "cwe_id": cwe_id,
+            "cwe_url": cwe_url,
+            "wasc_id": wasc_id,
+            "wasc_url": reference.WASC_MAP.get(wasc_id, None)
+        }
+
     def do_configure(self):
         logging.debug("ZAPPlugin.do_configure")
         self.zap_path = self.locate_program(self.ZAP_NAME)
@@ -122,11 +141,19 @@ class ZAPPlugin(ExternalProcessPlugin):
 
         issue = { "_Alert": alert,
                   "Summary" : alert.get('alert'),
+                  "Classification": self._classify(alert),
                   "Description" : alert.get('description'),
                   "Severity" : self._minion_severity(alert.get('risk')),
                   "Confidence" : alert.get('reliability'),
                   "Solution" : alert.get('solution'),
-                  "URLs" : [{'URL': alert.get('url'), 'Extra': alert.get('other')}] }
+                  "URLs" : [{
+                        'URL': alert.get('url'), 
+                        'Extra': alert.get('other'),
+                        'Attack': alert.get('attack'),
+                        'Evidence': alert.get('evidence'),
+                        'Parameter': alert.get('param')
+                  }]
+        }
         
         if alert.get('reference', '') != '':
             issue["FurtherInfo"] = [{'URL': url, 'Title': None} for url in alert.get('reference').split("\n")]
@@ -162,6 +189,7 @@ class ZAPPlugin(ExternalProcessPlugin):
 
             logging.info('Spidering target %s' % target)
             self.report_progress(34, 'Spidering target')
+            
             self.zap.spider.scan(target)
             # Give the Spider a chance to start
             time.sleep(2)
@@ -175,15 +203,20 @@ class ZAPPlugin(ExternalProcessPlugin):
                 time.sleep(5)
 
             logging.info('Spider completed')
-
+            
             self.report_progress(67, 'Scanning target')
-
+            
             if self.configuration.get('scan'):
                 # Give the passive scanner a chance to finish
                 time.sleep(5)
 
+                # add site to a context before starting a scan
+                self.zap.context.new_context()
+                self.zap.context.include_in_context('1', target)
+                self.zap.context.set_context_in_scope('1', True)
+
                 logging.info('Scanning target %s' % target)
-                self.zap.ascan.scan(target,recurse=True)
+                self.zap.ascan.scan(target, recurse=True, inscopeonly=True)
                 time.sleep(5)
                 while True:
                     scan_progress = int(self.zap.ascan.status)
