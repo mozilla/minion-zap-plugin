@@ -189,6 +189,7 @@ class ZAPPlugin(ExternalProcessPlugin):
 
             logging.info('Spidering target %s' % target)
             self.report_progress(34, 'Spidering target')
+            
             self.zap.spider.scan(target)
             # Give the Spider a chance to start
             time.sleep(2)
@@ -202,15 +203,20 @@ class ZAPPlugin(ExternalProcessPlugin):
                 time.sleep(5)
 
             logging.info('Spider completed')
-
+            
             self.report_progress(67, 'Scanning target')
-
+            
             if self.configuration.get('scan'):
                 # Give the passive scanner a chance to finish
                 time.sleep(5)
 
+                # add site to a context before starting a scan
+                self.zap.context.new_context()
+                self.zap.context.include_in_context('1', target)
+                self.zap.context.set_context_in_scope('1', True)
+
                 logging.info('Scanning target %s' % target)
-                self.zap.ascan.scan(target,recurse=True)
+                self.zap.ascan.scan(target, recurse=True, inscopeonly=True)
                 time.sleep(5)
                 while True:
                     scan_progress = int(self.zap.ascan.status)
