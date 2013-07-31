@@ -167,7 +167,6 @@ class ZAPPlugin(ExternalProcessPlugin):
         try:
             self.zap = ZAPv2(proxies={'http': 'http://127.0.0.1:%d' % self.zap_port, 'https': 'http://127.0.0.1:%d' % self.zap_port})
             target = self.configuration['target']
-            time.sleep(5)
             logging.info('Accessing target %s' % target)
 
             # ZAP start-up time can take a little while            
@@ -186,7 +185,6 @@ class ZAPPlugin(ExternalProcessPlugin):
             
             # Give the sites tree a chance to get updated
             time.sleep(2)
-
             logging.info('Spidering target %s' % target)
             self.report_progress(34, 'Spidering target')
             
@@ -205,18 +203,12 @@ class ZAPPlugin(ExternalProcessPlugin):
             logging.info('Spider completed')
             
             self.report_progress(67, 'Scanning target')
-            
             if self.configuration.get('scan'):
                 # Give the passive scanner a chance to finish
                 time.sleep(5)
 
-                # add site to a context before starting a scan
-                self.zap.context.new_context()
-                self.zap.context.include_in_context('1', target)
-                self.zap.context.set_context_in_scope('1', True)
-
                 logging.info('Scanning target %s' % target)
-                self.zap.ascan.scan(target, recurse=True, inscopeonly=True)
+                self.zap.ascan.scan(target, recurse=True)
                 time.sleep(5)
                 while True:
                     scan_progress = int(self.zap.ascan.status)
