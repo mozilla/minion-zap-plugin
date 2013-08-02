@@ -89,6 +89,10 @@ class ZAPPlugin(ExternalProcessPlugin):
     def do_start(self):
         logging.debug("ZAPPlugin.do_start")
 
+        policies = self.configuration.get('policies')
+        data = {}
+        if policies:
+            data['policies'] = policies
         # Configure config.xml before starting daemon if 
         # user chooses basic auth. 
         #TODO: Until I or psiinon add an API to ZAP to configure
@@ -105,8 +109,9 @@ class ZAPPlugin(ExternalProcessPlugin):
                 # in auth already.
                 site_info = self.get_site_info()
                 site_info.update(auth)
-                # write config.xml
-                self.config(site_info)
+                data.update(site_info)
+        # write config.xml
+        self.config(data)
 
         # Start ZAP in daemon mode
         self.zap_port = self._random_port()
