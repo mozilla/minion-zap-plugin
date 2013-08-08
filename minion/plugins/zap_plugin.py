@@ -32,6 +32,20 @@ class ZAPPlugin(ExternalProcessPlugin):
             template = jinja2.Template(content)
             f.write(template.render(data))
 
+    def exclude(self):
+        """ Exclude a set of urls in regex from proxy, scanner and spider. """
+        _excludes = {'proxy': self.zap.core.exclude_from_proxy,
+            'spider': self.zap.spider.exclude_from_scan, 
+            'scanner': self.zap.ascan.exclude_from_scan}
+
+        config = self.configuration.get('excludes')
+        if config:
+            for name, f in _excludes.iteritems():
+                if config.get(name):
+                    logging.info('%s exist' % name)
+                    for url in config[name]:
+                        f('\Q%s\E' % url)
+
     def do_session(self, auth):
         """ Adding session token and its value
         to ZAP session. """
@@ -182,7 +196,9 @@ class ZAPPlugin(ExternalProcessPlugin):
             auth = self.configuration.get('auth')
             if auth and isinstance(auth, dict) and auth.get('type') == 'session':
                 self.do_session(auth)
-            
+        
+            self.exclude()
+    
             # Give the sites tree a chance to get updated
             time.sleep(2)
             logging.info('Spidering target %s' % target)
