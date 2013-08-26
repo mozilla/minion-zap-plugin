@@ -2,6 +2,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import json
 import logging
 import os
 import random
@@ -87,11 +88,32 @@ class ZAPPlugin(ExternalProcessPlugin):
             "wasc_url": reference.WASC_MAP.get(wasc_id, None)
         }
 
+    def _load_global_config(self):
+        """
+        Load a global config from either /etc/minion/zap-plugin.json
+        or from ~/.minion/zap-plugin.json in that order.
+        """
+        if os.path.exists("/etc/minion/zap-plugin.json"):
+            with open("/etc/minion/zap-plugin.json") as fp:
+                return json.load(fp)
+        if os.path.exists(os.path.expanduser("~/.minion/zap-plugin.json")):
+            with open(os.path.expanduser("~/.minion/zap-plugin.json")) as fp:
+                return json.load(fp)
+
     def do_configure(self):
         logging.debug("ZAPPlugin.do_configure")
-        self.zap_path = self.locate_program(self.ZAP_NAME)
-        if self.zap_path is None:
-            raise Exception("Cannot find %s in PATH" % self.ZAP_NAME)
+        # Load the global configuration file to find the path to zap
+        global_config = self._load_global_config()
+        if global_config and global_config.get('zap-path'):
+            zap_path = global_config.get('zap-path') + '/zap.sh'
+            if not os.path.exists(zap_path):
+                raise Exception("Cannot find %s" % zap_path)
+            self.zap_path = zap_path
+        else:
+            self.zap_path = self.locate_program(self.ZAP_NAME)
+            if self.zap_path is None:
+                raise Exception("Cannot find %s in PATH" % self.ZAP_NAME)
+        logging.debug("Using ZAP at %s" % self.zap_path)
         # Validate the configuration
         if self.configuration.get('target') is None or len(self.configuration['target']) == 0:
             raise Exception("Missing or invalid target in configuration")
