@@ -32,20 +32,20 @@ First, you must have ZAP setup on your system. Assume you are under ``/home/user
 
 Now zap folder should be under ``/home/username/zap``. 
 
-ZAP should be available on your system PATH by adding ``:/home/username/zap`` to the end inside
-the quote. The file you probably want to change is ``/etc/environment`` so all shells can see
-ZAP::
+The plugin looks for ZAP's `zap.sh` script either on the system `PATH` or in a directory specified
+in either `~/.minion/zap-plugin.json` or `/etc/minion/zap-plugin.json`. It is generally easier
+to use the configuration file than to change the system `PATH` so that is what we recommend.
 
-    $ sudo vim /etc/enviornment
+The `zap-plugin.json` config file should look as follows:
 
+```
+{
+   "zap-path": "/some/place/ZAP_WEEKLY_D-2013-07-22"
+}
+```
 
-If you refresh your current shell, you should see ``zap.sh``::
-
-    $ source ~/.bashrc
-    $ zap.sh --help
-
-You can put the zap folder anywhere, as long as the system has the permission to read and
-execute, and you add the right path to PATH.
+You can put the ZAP directory anywhere, as long as the user executing the plugins has the
+right permissions to read and execute the `zap.sh` script.
 
 
 Plugin installation
