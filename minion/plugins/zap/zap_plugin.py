@@ -23,7 +23,8 @@ class ZAPPlugin(ExternalProcessPlugin):
     PLUGIN_VERSION = "0.3"
 
     ZAP_NAME = "zap.sh"
-    
+    ZAP_COMPATIBLE_VERSIONS = ('D-2013-09-19',)
+
     def config(self, data):
         """ Render and write ZAP's config.xml file. """
         curr = os.path.dirname(os.path.abspath(__file__))
@@ -36,7 +37,7 @@ class ZAPPlugin(ExternalProcessPlugin):
     def exclude(self):
         """ Exclude a set of urls in regex from proxy, scanner and spider. """
         _excludes = {'proxy': self.zap.core.exclude_from_proxy,
-            'spider': self.zap.spider.exclude_from_scan, 
+            'spider': self.zap.spider.exclude_from_scan,
             'scanner': self.zap.ascan.exclude_from_scan}
 
         config = self.configuration.get('excludes')
@@ -50,7 +51,7 @@ class ZAPPlugin(ExternalProcessPlugin):
     def do_session(self, auth):
         """ Adding session token and its value
         to ZAP session. """
- 
+
         site_info = self.get_site_info()
         sessions = auth['sessions']
 
@@ -60,7 +61,7 @@ class ZAPPlugin(ExternalProcessPlugin):
         self.zap.httpsessions.set_active_session(
             netloc,
             'Session 0')
-        for session in sessions:                    
+        for session in sessions:
             self.zap.httpsessions.add_session_token(
                 netloc,
                 session['token'])
@@ -129,8 +130,8 @@ class ZAPPlugin(ExternalProcessPlugin):
         data = {}
         if policies:
             data['policies'] = policies
-        # Configure config.xml before starting daemon if 
-        # user chooses basic auth. 
+        # Configure config.xml before starting daemon if
+        # user chooses basic auth.
         #TODO: Until I or psiinon add an API to ZAP to configure
         # the configuration file directly via Python API,
         # config.xml must be written BEFORE the server starts up.
@@ -157,7 +158,7 @@ class ZAPPlugin(ExternalProcessPlugin):
 
         # Start the main code in a thread
         return deferToThread(self._blocking_zap_main)
-        
+
     def _random_port(self):
         return random.randint(8192, 16384)
 
@@ -172,7 +173,7 @@ class ZAPPlugin(ExternalProcessPlugin):
     #   Solution:     solution
     #   URLs:         (URL:url,Extra:other)*
     #
-    
+
     def _minion_severity(self, severity):
         if severity == 'Informational':
             return 'Info'
@@ -188,14 +189,14 @@ class ZAPPlugin(ExternalProcessPlugin):
                   "Confidence" : alert.get('reliability'),
                   "Solution" : alert.get('solution'),
                   "URLs" : [{
-                        'URL': alert.get('url'), 
+                        'URL': alert.get('url'),
                         'Extra': alert.get('other'),
                         'Attack': alert.get('attack'),
                         'Evidence': alert.get('evidence'),
                         'Parameter': alert.get('param')
                   }]
         }
-        
+
         if alert.get('reference', '') != '':
             issue["FurtherInfo"] = [{'URL': url, 'Title': None} for url in alert.get('reference').split("\n")]
 
@@ -210,27 +211,38 @@ class ZAPPlugin(ExternalProcessPlugin):
             target = self.configuration['target']
             logging.info('Accessing target %s' % target)
 
-            # ZAP start-up time can take a little while            
+            # ZAP start-up time can take a little while
             while (True):
                 try:
                     self.zap.urlopen(target)
                     break
                 except IOError as e:
                     time.sleep(2)
-    
+
+            version = self.zap.core.version
+            if version not in self.ZAP_COMPATIBLE_VERSIONS:
+                issue = { "Summary": "Incompatible version of ZAP found.",
+                          "Description": "This version of the Minion ZAP Plugin is only compatible with ZAP versions %s. You have %s installed." % (str(self.ZAP_COMPATIBLE_VERSIONS), version),
+                          "Severity": "Error" }
+                self.report_issue(issue)
+                zapbug783 = self.zap.core.shutdown
+                self.report_finish()
+                return
+
+
             # Once we know ZAP is fully started, we can
             # setup sessions if auth type == 'sessions'
             auth = self.configuration.get('auth')
             if auth and isinstance(auth, dict) and auth.get('type') == 'session':
                 self.do_session(auth)
-        
+
             self.exclude()
-    
+
             # Give the sites tree a chance to get updated
             time.sleep(2)
             logging.info('Spidering target %s' % target)
             self.report_progress(34, 'Spidering target')
-            
+
             self.zap.spider.scan(target)
             # Give the Spider a chance to start
             time.sleep(2)
@@ -244,7 +256,7 @@ class ZAPPlugin(ExternalProcessPlugin):
                 time.sleep(5)
 
             logging.info('Spider completed')
-            
+
             self.report_progress(67, 'Scanning target')
             if self.configuration.get('scan'):
                 # Give the passive scanner a chance to finish
@@ -263,11 +275,11 @@ class ZAPPlugin(ExternalProcessPlugin):
                     time.sleep(5)
 
             self.report_progress(100, 'Completing scan')
-    
+
             #
             # Report the found issues. We group them by Summary.
             #
-            
+
             issues_by_summary = {}
             for alert in self.zap.core.alerts()['alerts']:
                 issue = self._minion_issue(alert)
@@ -286,8 +298,7 @@ class ZAPPlugin(ExternalProcessPlugin):
                 # TODO shutdown() throws an error but seems to shut down ok
                 pass
             self.report_finish()
-            
+
         except Exception as e:
 
             logging.exception("Error while executing zap plugin")
-
