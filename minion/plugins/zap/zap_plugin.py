@@ -23,7 +23,7 @@ class ZAPPlugin(ExternalProcessPlugin):
     PLUGIN_VERSION = "0.3"
 
     ZAP_NAME = "zap.sh"
-    ZAP_COMPATIBLE_VERSIONS = ('D-2013-09-19',)
+    ZAP_COMPATIBLE_VERSIONS = ('2.2.0',)
 
     def config(self, data):
         """ Render and write ZAP's config.xml file. """
