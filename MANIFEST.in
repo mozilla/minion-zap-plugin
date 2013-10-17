@@ -1,1 +1,1 @@
-include minion/plugins/config.xml.example
+include minion/plugins/zap/config.xml.example
