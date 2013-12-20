@@ -24,13 +24,11 @@ assume you use the weekly built on 07-22.
 ZAP installation
 ----------------
 
-First, you must have ZAP setup on your system. Assume you are under ``/home/username``::
+First, you must have ZAP setup on your system. Assume you are under ``/home/username``, you can
+get the latest weekly or stable release of ZAP from http://sourceforge.net/projects/zaproxy/files/.
 
-    $ wget http://zaproxy.googlecode.com/files/ZAP_WEEKLY_D-2013-07-22.zip
-    $ unzip ZAP_WEEKLY_D-2013-07-22.zip
-    $ mv ZAP_D-2013-07-22 zap
-
-Now zap folder should be under ``/home/username/zap``. 
+Download and extract the compressed file. For the purpose of this documentation, we will rename
+the extracted folder to the name "zap", so that it resides at ``/home/username/zap".
 
 The plugin looks for ZAP's ``zap.sh`` script either on the system ``PATH`` or in a directory specified
 in either ``~/.minion/zap-plugin.json`` or ``/etc/minion/zap-plugin.json``. It is generally easier
@@ -41,7 +39,7 @@ The ``zap-plugin.json`` config file should look as follows:
 .. code:: json
 
     {
-        "zap-path": "/some/place/ZAP_WEEKLY_D-2013-07-22"
+        "zap-path": "/home/username/zap/"
     }
 
 You can put the ZAP directory anywhere, as long as the user executing the plugins has the
@@ -112,7 +110,7 @@ JSON configuration document you can put as a Minion zap plan:
                 "scan": true
             },
             "description": "Run the ZAP Spider and Scanner",
-            "plugin_name": "minion.plugins.zap_plugin.ZAPPlugin"
+            "plugin_name": "minion.plugins.zap.ZAPPlugin"
         }
     ]
 
