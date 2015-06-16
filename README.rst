@@ -5,7 +5,7 @@ This is a plugin for Minion that executes the OWASP Zed Attack Proxy (ZAP)
 penetration testing tool. This tool is designed to find vulnerabilities in web
 applications. 
 
-Interested in learning more about ZAP? See `zaproxy <https://code.google.com/p/zaproxy>`_.
+Interested in learning more about ZAP? See `zaproxy <https://github.com/zaproxy/zaproxy>`_.
 
 Requirements
 ------------
