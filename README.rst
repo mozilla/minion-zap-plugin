@@ -14,18 +14,24 @@ Minion is well-supported on most Linux distro (Ubuntu, Fedora, etc).
 
 * Python 2.7
 * virtualenv
-* ZAP weekly build (07-22 or above)
+* ZAP 2.4.2 (or a more recent stable or weekly release)
 * ZAP python client 0.6
 
-We recommend the weekly build from 07-22 and python client to be 0.6. You can find
-other weekly releases by visiting zaproxy on Google code, but this README will 
-assume you use the weekly built on 07-22.
+We recommend the latest stable release. 
+You can also use the latest weekly release if you need a fix or feature that has been implemented since the stable release. 
+
+This README will assume you are using ZAP 2.4.2.
 
 ZAP installation
 ----------------
 
 First, you must have ZAP setup on your system. Assume you are under ``/home/username``, you can
-get the latest weekly or stable release of ZAP from http://sourceforge.net/projects/zaproxy/files/.
+get the latest weekly or stable release of ZAP from https://github.com/zaproxy/zaproxy/wiki/Downloads.
+
+You will also need Java 7 installed. If you are using the `minion-vm <https://github.com/mozilla/minion-vm>` 
+then you can install it using:
+
+* sudo apt-get --assume-yes install openjdk-7-jre 
 
 Download and extract the compressed file. For the purpose of this documentation, we will rename
 the extracted folder to the name "zap", so that it resides at ``/home/username/zap".
@@ -49,7 +55,11 @@ right permissions to read and execute the ``zap.sh`` script.
 Plugin installation
 -------------------
 
-Assume you have minion installed, you can clone this plugin and do ``python setup.py``::
+If you are using `minion-vm <https://github.com/mozilla/minion-vm>` you should first run:
+
+* source /opt/minion/minion-env/bin/activate 
+ 
+Assuming you have minion installed, you can clone this plugin and do ``python setup.py``::
 
     $ git clone https://github.com/mozilla/minion-zap-plugin
     $ cd minion-zap-plugin
@@ -57,6 +67,7 @@ Assume you have minion installed, you can clone this plugin and do ``python setu
 
 If you are developing minion and zap, you should run ``python setup.py develop`` using an
 appropriate python environment (using a virtualenv or the global python interpreter).
+
 
 Finally, you **must** restart minion-backend and all backend queue workers. Now go to your
 minion administration interface on the browser, go to plugins, you should see zap plugin

@@ -23,7 +23,7 @@ class ZAPPlugin(ExternalProcessPlugin):
     PLUGIN_VERSION = "0.3"
 
     ZAP_NAME = "zap.sh"
-    ZAP_COMPATIBLE_VERSIONS = ('2.2.0', '2.2.1', '2.2.2')
+    ZAP_COMPATIBLE_VERSIONS = ('2.4.0', '2.4.1', '2.4.2')
 
     def config(self, data):
         """ Render and write ZAP's config.xml file. """
@@ -152,12 +152,21 @@ class ZAPPlugin(ExternalProcessPlugin):
 
         # Start ZAP in daemon mode
         self.zap_port = self._random_port()
-        args = ['-daemon', '-port', str(self.zap_port), '-dir', self.work_directory]
+        # TODO create and use a random API key
+        args = ['-daemon', '-port', str(self.zap_port), '-dir', self.work_directory, '-config', 'api.disablekey=true']
         self.spawn(self.zap_path, args)
         self.report_artifacts("ZAP Output", ["zap.log"])
 
         # Start the main code in a thread
         return deferToThread(self._blocking_zap_main)
+
+    def do_stop(self):
+        logging.debug("ZAPPlugin.do_stop")
+        try:
+            self.zap.core.shutdown()
+        except:
+            # TODO shutdown() throws an error but seems to shut down ok
+            pass
 
     def _random_port(self):
         return random.randint(8192, 16384)
@@ -243,7 +252,7 @@ class ZAPPlugin(ExternalProcessPlugin):
             logging.info('Spidering target %s' % target)
             self.report_progress(34, 'Spidering target')
 
-            self.zap.spider.scan(target)
+            spider_id = self.zap.spider.scan(target)['scan']
             # Give the Spider a chance to start
             time.sleep(2)
             while True:
@@ -281,7 +290,7 @@ class ZAPPlugin(ExternalProcessPlugin):
             #
 
             issues_by_summary = {}
-            for alert in self.zap.core.alerts()['alerts']:
+            for alert in self.zap.core.alerts():
                 issue = self._minion_issue(alert)
                 if issue['Summary'] not in issues_by_summary:
                     issues_by_summary[issue['Summary']] = issue
