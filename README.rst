@@ -28,7 +28,7 @@ ZAP installation
 First, you must have ZAP setup on your system. Assume you are under ``/home/username``, you can
 get the latest weekly or stable release of ZAP from https://github.com/zaproxy/zaproxy/wiki/Downloads.
 
-You will also need Java 7 installed. If you are using the `minion-vm <https://github.com/mozilla/minion-vm>` 
+You will also need Java 7 installed. If you are using the `minion-vm <https://github.com/mozilla/minion-vm>`_ 
 then you can install it using:
 
 * sudo apt-get --assume-yes install openjdk-7-jre 
@@ -55,7 +55,7 @@ right permissions to read and execute the ``zap.sh`` script.
 Plugin installation
 -------------------
 
-If you are using `minion-vm <https://github.com/mozilla/minion-vm>` you should first run:
+If you are using `minion-vm <https://github.com/mozilla/minion-vm>`_ you should first run:
 
 * source /opt/minion/minion-env/bin/activate 
  
