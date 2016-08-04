@@ -178,8 +178,8 @@ if you are only interested in a particular subset of issues.
 
 You specify ``policies`` and the value is a list of ``["policy_id": "0/1"]``, where
 ``0`` is off and ``1`` is on. The policy id is hard code in ZAP and we have extracted
-this list in ``minion-zap-plugin/minion/plugins/reference.py``. See 
-`reference.py <https://github.com/mozilla/minion-zap-plugin/blob/master/minion/plugins/reference.py>`_.
+this list in ``minion-zap-plugin/minion/plugins/zap/reference.py``. See 
+`reference.py <https://github.com/mozilla/minion-zap-plugin/blob/master/minion/plugins/zap/reference.py>`_.
 
 In the example JSON above, ``40012`` corresponds to "Cross site scripting (Reflected)".
 
